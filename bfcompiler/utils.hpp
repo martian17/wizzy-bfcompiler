@@ -27,6 +27,7 @@ struct Instruction {
 //	Instruction* next = NULL;
 
 	// default overloading
+	Instruction() : type(InstructionType::COMMENT), data(0), data2(0) {};
 	Instruction(InstructionType t) : type(t), data(0), data2(0) {};
 	Instruction(InstructionType t, int d) : type(t), data(d), data2(0) {};
 	Instruction(InstructionType t, int d, int d2) : type(t), data(d), data2(d2) {};
