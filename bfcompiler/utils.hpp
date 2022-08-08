@@ -3,6 +3,12 @@
 #include<stack>
 #include<exception>
 #include<iostream>
+#include<sstream>
+#ifdef DEBUG
+#define DEBUG_PRINT(x) std::cout << x << std::endl
+#else
+#define DEBUG_PRINT(x)
+#endif
 
 // this is going to be included in only main.cpp so definations are fine
 
@@ -71,6 +77,71 @@ InstructionType classify(const char t) {
 			return InstructionType::COMMENT;
 	}
 }
+
+#ifdef DEBUG
+namespace fmt{
+	std::string to_string(const std::vector<uint8_t> vec){
+		
+		std::stringstream ss;
+		ss << "[ ";
+    	for (auto i = vec.begin(); i != vec.end(); i++){
+			if(i != vec.begin()){
+				 ss << ", ";
+			}
+			ss << (int)*i;
+    	}
+		ss << " ]";
+        return ss.str();
+    }
+	std::string to_string(const std::vector<Instruction> instructions){
+		
+		std::stringstream ss;
+		ss << "[ ";
+    	for (auto i = instructions.begin(); i != instructions.end(); i++){
+			if(i != instructions.begin()){
+				 ss << ", ";
+			}
+			Instruction ins = *i;
+			switch(ins.type){
+				case InstructionType::INC:
+				ss << "INC(" << ins.data << ")";
+				break;
+				case InstructionType::MOV:
+				ss << "MOV(" << ins.data << ")";
+				break;
+				case InstructionType::JMZ:
+				ss << "JMZ(" << ins.data << ")";
+				break;
+				case InstructionType::JNZ:
+				ss << "JNZ(" << ins.data << ")";
+				break;
+				case InstructionType::IN:
+				ss << "IN";
+				break;
+				case InstructionType::OUT:
+				ss << "OUT";
+				break;
+				case InstructionType::COMMENT:
+				ss << "COMMENT";
+				break;
+				case InstructionType::MEMSET:
+				ss << "MEMSET(" << ins.data << ")";
+				break;
+				case InstructionType::MEMMOV:
+				ss << "MEMMOV(" << ins.data << "," << ins.data2 << ")";
+				break;
+				case InstructionType::INVERT:
+				ss << "INVERT";
+				break;
+			}
+    	}
+		ss << " ]";
+        return ss.str();
+    }
+}
+
+#include"fmt.hpp"
+#endif
 
 std::vector<Instruction> make_instructions(std::fstream &fp) {
 	char i;
@@ -166,6 +237,9 @@ std::vector<Instruction> make_instructions(std::fstream &fp) {
 					//todo: lookahead cases like [-]+++++ and convert it to MEMSET(5)
 					block.push_back(Instruction(InstructionType::MEMSET,0));
 					
+					DEBUG_PRINT(fmt::format("memfield:        {} {} {} {}",memfield,min_mptr,-min_mptr,max_mptr));
+					DEBUG_PRINT(fmt::format("Optimized block: {}",block));
+					
 					//discard the existing instruction field
 					ret.resize(loop_start);
 					//append block to ret
@@ -186,7 +260,7 @@ std::vector<Instruction> make_instructions(std::fstream &fp) {
 	if (!loops.empty()) {
 		throw std::invalid_argument("Encountered unmatched '[' in source");
 	}
-
+	DEBUG_PRINT(fmt::format("\n\n\n*Debug mode*\nDisplaying bytecode:\nret: {}\n\n\n",ret));
 	return ret;
 }
 
