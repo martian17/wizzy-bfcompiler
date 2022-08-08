@@ -146,6 +146,8 @@ namespace fmt{
 
 int lookahead_incr(std::string::iterator &it, std::string &str){
 	int v = 0;
+	it++;
+	DEBUG_PRINT(*it);
 	for(;it != str.end(); it++){
 		char i = *it;
 		InstructionType t = classify(i);
@@ -157,7 +159,7 @@ int lookahead_incr(std::string::iterator &it, std::string &str){
 			break;
 		}
 	}
-	if(it == str.end())it--;
+	it--;
 	return v;
 }
 
