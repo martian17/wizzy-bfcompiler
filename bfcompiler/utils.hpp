@@ -109,9 +109,73 @@ std::vector<Instruction> make_instructions(std::fstream &fp) {
 				size_t loop_contnet_start = loop_start+1;//points to the instr after to "["
 				size_t loop_end = ret.size();
 				loops.pop();
-				innermost_flag = false;
-				ret[loop_start].data = loop_end;
-				ret.push_back(Instruction(t, loop_start));
+				bool optimized_flag = false;
+				while(innermost_flag){//only runs once, breakout loop
+					innermost_flag = false;
+					int mptr = 0;
+					int min_mptr = 0;
+					int max_mptr = 0;
+					//check if inner MOV adds up to 0
+					//as well as calculate max and min relative mptr
+					for(size_t pc = loop_contnet_start; pc < loop_end; pc++){
+						if(ret[pc].type == InstructionType::MOV){
+							mptr += ret[pc].data;
+							if(mptr < min_mptr){
+								min_mptr = mptr;
+							}else if(mptr > max_mptr){
+								max_mptr = mptr;
+							}
+						}else if(
+							//no IO in optimized chunk
+							ret[pc].type == InstructionType::IN ||
+							ret[pc].type == InstructionType::OUT
+						){
+							mptr = 1;
+							break;
+						}
+					}
+					if(mptr != 0)break;
+					std::vector<uint8_t> memfield(max_mptr - min_mptr + 1);
+					//tally up all the pluses and minuses
+					for(size_t pc = loop_contnet_start; pc < loop_end; pc++){
+						if(ret[pc].type == InstructionType::MOV){
+							mptr += ret[pc].data;
+						}else if(ret[pc].type == InstructionType::INC){
+							memfield[mptr-min_mptr] += ret[pc].data;
+						}
+					}
+					if(memfield[-min_mptr] != 255 && memfield[-min_mptr] != 1){
+						//result unpredictable, not optimizing
+						break;
+					}
+					//all conditions cleared, optimization possible
+					std::vector<Instruction> block;
+					
+					//handling cases like [+>++<]
+					//[+>++<] is equivalent to INVERT() MEMMOV(1,2) MEMSET(0)
+					if( memfield[-min_mptr] == 1 && 
+						//in case of [+], no INVERT is needed
+						max_mptr - min_mptr != 0){
+						//converting [+>+<] to [->+<] equivalent
+						block.push_back(Instruction(InstructionType::INVERT));
+					}
+					for(mptr = min_mptr; mptr <= max_mptr; mptr++){
+						if(mptr == 0 || memfield[mptr-min_mptr] == 0)continue;
+						block.push_back(Instruction(InstructionType::MEMMOV,mptr,memfield[mptr-min_mptr]));
+					}
+					//todo: lookahead cases like [-]+++++ and convert it to MEMSET(5)
+					block.push_back(Instruction(InstructionType::MEMSET,0));
+					
+					//discard the existing instruction field
+					ret.resize(loop_start);
+					//append block to ret
+					ret.insert(ret.end(), block.begin(), block.end());
+					optimized_flag = true;
+				}
+				if(!optimized_flag){
+					ret[loop_start].data = loop_end;
+					ret.push_back(Instruction(t, loop_start));
+				}
 			}
 			else {
 				throw std::invalid_argument("Encountered unmatched ']' in source");
