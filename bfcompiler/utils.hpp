@@ -76,12 +76,14 @@ std::vector<Instruction> make_instructions(std::fstream &fp) {
 	char i;
 	std::stack<size_t> loops;
 	std::vector<Instruction> ret;
+	bool innermost_flag = true;
 
 	while (fp.get(i)) {
 		InstructionType t = classify(i);
 		if (t == InstructionType::COMMENT) { continue; }
 
 		if (t == InstructionType::JMZ) {
+		    innermost_flag = true;
 			loops.push(ret.size());
 			ret.push_back(Instruction(t, 0));
 		}
@@ -107,6 +109,7 @@ std::vector<Instruction> make_instructions(std::fstream &fp) {
 				size_t loop_contnet_start = loop_start+1;//points to the instr after to "["
 				size_t loop_end = ret.size();
 				loops.pop();
+				innermost_flag = false;
 				ret[loop_start].data = loop_end;
 				ret.push_back(Instruction(t, loop_start));
 			}
