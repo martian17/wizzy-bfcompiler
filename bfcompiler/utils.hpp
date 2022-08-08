@@ -16,14 +16,14 @@ enum struct InstructionType : char {
 	COMMENT, //does nothing
 	//optimizing instructions
 	MEMSET,  //MEMSET(n)   set mem[mptr] to n
-	MEMMOV,  //MEMMOV(n,m) mem[mptr+n] += mem[mptr]
+	MEMMOV,  //MEMMOV(n,m) mem[mptr+n] += mem[mptr]*m
 	INVERT   //INVERT()    mem[mptr] = 256 - mem[mptr]
 };
 
 struct Instruction {
 	InstructionType type;
 	int data;
-	int data2;// extra data field for MEMMOV(relative location, moltiplier)
+	int data2;// extra data field for MEMMOV(relative location, multiplier)
 //	Instruction* next = NULL;
 
 	// default overloading
