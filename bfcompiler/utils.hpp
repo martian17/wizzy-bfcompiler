@@ -95,8 +95,6 @@ std::vector<Instruction> make_instructions(std::fstream &fp) {
 		}
 		else { // InstructionType::JNZ
 			if (!loops.empty()) {
-				ret[loops.top()].data = ret.size();
-				ret.push_back(Instruction(t, loops.top()));
 				//opportunity for optimization here
 				//if the loop is innermost, and the sum of MOV == 0,
 				//we can convert them into MEMMOV() amd MEMSET() instructions
@@ -105,7 +103,12 @@ std::vector<Instruction> make_instructions(std::fstream &fp) {
 				//and [-]+++ will be MEMSET(3)
 				//[->>>++>>>+<<<<<<]+++++ will be MEMMOV(3,2)  MEMMOV(6,1) MEMSET(5)
 				//MEMMOV will add the current memory content to mptr+3 and mptr+6
+				size_t loop_start = loops.top();//points to "["
+				size_t loop_contnet_start = loop_start+1;//points to the instr after to "["
+				size_t loop_end = ret.size();
 				loops.pop();
+				ret[loop_start].data = loop_end;
+				ret.push_back(Instruction(t, loop_start));
 			}
 			else {
 				throw std::invalid_argument("Encountered unmatched ']' in source");
