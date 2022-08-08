@@ -23,9 +23,13 @@ enum struct InstructionType : char {
 struct Instruction {
 	InstructionType type;
 	int data;
+	int data2;// extra data field for MEMMOV(relative location, moltiplier)
 //	Instruction* next = NULL;
 
-	Instruction(InstructionType t, int d) : type(t), data(d) {};
+	// default overloading
+	Instruction(InstructionType t) : type(t), data(0), data2(0) {};
+	Instruction(InstructionType t, int d) : type(t), data(d), data2(0) {};
+	Instruction(InstructionType t, int d, int d2) : type(t), data(d), data2(d2) {};
 
 	bool is_dead() {
 		return (type == InstructionType::COMMENT || data == 0);
