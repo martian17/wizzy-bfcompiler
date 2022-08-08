@@ -143,13 +143,35 @@ namespace fmt{
 #include"fmt.hpp"
 #endif
 
+
+int lookahead_incr(std::string::iterator &it, std::string &str){
+	int v = 0;
+	for(;it != str.end(); it++){
+		char i = *it;
+		InstructionType t = classify(i);
+		if(t == InstructionType::INC){
+			v += get_tenative_data(t,i);
+		}else if(t == InstructionType::INC){
+			continue;
+		}else{
+			break;
+		}
+	}
+	if(it == str.end())it--;
+	return v;
+}
+
 std::vector<Instruction> make_instructions(std::fstream &fp) {
-	char i;
+	std::stringstream ss;
+	ss << fp.rdbuf();
+	std::string str = ss.str();
+	
 	std::stack<size_t> loops;
 	std::vector<Instruction> ret;
 	bool innermost_flag = true;
-
-	while (fp.get(i)) {
+	
+	for(auto it = str.begin(); it != str.end(); it++){
+		char i = *it;
 		InstructionType t = classify(i);
 		if (t == InstructionType::COMMENT) { continue; }
 
@@ -234,8 +256,12 @@ std::vector<Instruction> make_instructions(std::fstream &fp) {
 						if(mptr == 0 || memfield[mptr-min_mptr] == 0)continue;
 						block.push_back(Instruction(InstructionType::MEMMOV,mptr,memfield[mptr-min_mptr]));
 					}
-					//todo: lookahead cases like [-]+++++ and convert it to MEMSET(5)
-					block.push_back(Instruction(InstructionType::MEMSET,0));
+					
+					//lookahead_incr(it,str) finds cases like [-]+++++ and converts them to MEMSET(5)
+					//arguments are passed as reference
+					//`std::str::iterator it` gets overwritten to a new position as a side effect
+					//returns the number of total increments
+					block.push_back(Instruction(InstructionType::MEMSET,lookahead_incr(it,str)));
 					
 					DEBUG_PRINT(fmt::format("memfield:        {} {} {} {}",memfield,min_mptr,-min_mptr,max_mptr));
 					DEBUG_PRINT(fmt::format("Optimized block: {}",block));
