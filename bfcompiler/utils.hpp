@@ -166,10 +166,13 @@ void brainfuck(const std::vector<Instruction> &is, unsigned int len) {
 				break;
 			case InstructionType::MEMSET:
 				mem[mptr] = i.data;
+				break;
 			case InstructionType::MEMMOV:
 				mem[mptr+i.data] += (uint8_t)((int)mem[mptr] * i.data2);
+				break;
 			case InstructionType::INVERT:
 				mem[mptr] = 0-mem[mptr];
+				break;
 			default:
 				break;
 		}
