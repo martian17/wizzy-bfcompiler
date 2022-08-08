@@ -7,7 +7,17 @@
 // this is going to be included in only main.cpp so definations are fine
 
 enum struct InstructionType : char {
-	INC, MOV, JMZ, JNZ, IN, OUT, COMMENT
+	INC,     //INC(n) add n to mem[mptr]
+	MOV,     //MOV(n) add n to mptr
+	JMZ,     //JMZ(n) pc = n if mem[mptr] is zero
+	JNZ,     //JNZ(n) pc = n if mem[mptr] is non zero
+	IN,      //IN()   mem[mptr] = input
+	OUT,     //OUT()  output += mem[mptr]
+	COMMENT, //does nothing
+	//optimizing instructions
+	MEMSET,  //MEMSET(n)   set mem[mptr] to n
+	MEMMOV,  //MEMMOV(n,m) mem[mptr+n] += mem[mptr]
+	INVERT   //INVERT()    mem[mptr] = 256 - mem[mptr]
 };
 
 struct Instruction {
