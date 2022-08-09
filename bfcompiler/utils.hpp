@@ -84,20 +84,20 @@ namespace fmt{
 		
 		std::stringstream ss;
 		ss << "[ ";
-    	for (auto i = vec.begin(); i != vec.end(); i++){
+		for (auto i = vec.begin(); i != vec.end(); i++){
 			if(i != vec.begin()){
 				 ss << ", ";
 			}
 			ss << (int)*i;
-    	}
+		}
 		ss << " ]";
-        return ss.str();
-    }
+		return ss.str();
+	}
 	std::string to_string(const std::vector<Instruction> instructions){
 		
 		std::stringstream ss;
 		ss << "[ ";
-    	for (auto i = instructions.begin(); i != instructions.end(); i++){
+		for (auto i = instructions.begin(); i != instructions.end(); i++){
 			if(i != instructions.begin()){
 				 ss << ", ";
 			}
@@ -134,10 +134,10 @@ namespace fmt{
 				ss << "INVERT";
 				break;
 			}
-    	}
+		}
 		ss << " ]";
-        return ss.str();
-    }
+		return ss.str();
+	}
 }
 
 #include"fmt.hpp"
@@ -178,7 +178,7 @@ std::vector<Instruction> make_instructions(std::fstream &fp) {
 		if (t == InstructionType::COMMENT) { continue; }
 
 		if (t == InstructionType::JMZ) {
-		    innermost_flag = true;
+			innermost_flag = true;
 			loops.push(ret.size());
 			ret.push_back(Instruction(t, 0));
 		}
