@@ -153,7 +153,7 @@ int lookahead_incr(std::string::iterator &it, std::string &str){
 		InstructionType t = classify(i);
 		if(t == InstructionType::INC){
 			v += get_tenative_data(t,i);
-		}else if(t == InstructionType::INC){
+		}else if(t == InstructionType::COMMENT){
 			continue;
 		}else{
 			break;
